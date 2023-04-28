@@ -1,0 +1,21 @@
+{
+  "name": "websitecachehitter",
+  "version": "1.0.0",
+  "description": "hit web site urls for auto caching",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo 'fuck you and your tests' && echo 0"
+  },
+  "keywords": [
+    "puppeteer",
+    "scrapping",
+    "automation"
+  ],
+  "author": "jean-yves Chaillou @ kwa",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.1",
+    "puppeteer": "^19.9.0"
+  }
+}
