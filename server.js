@@ -6,10 +6,35 @@ const { getToken, getAllCatsUrls } = require("./src/magento");
 const { forLoopUrls, launchPuppeteer } = require("./src/crawler");
 const { rejects } = require("assert");
 
+const State = require("./src/state");
+const state = new State().getInstance();
+
+// micro server
+const express = require("express");
+const port = process.env.PORT || 1223;
+const http = require("http");
+const app = express();
+const server = http.createServer(app);
+
+
+// web socket
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({
+  server: server,
+  path: ("/state")
+})
+// console.log('state',state)
+// state.stop = true
+// console.log('state',state)
+// const state2 = new State().getInstance();
+// console.log('state2', state2)
+// process.exit(1);
+
 
 // global vars form browser manipulation 
 let headless = false;
 let startAt = null;
+let onlyFront = false;
 
 
 // get args if any
@@ -27,6 +52,11 @@ if (args.length) {
     start=[id] : start At [id]
     `);
     process.exit(1);
+  }
+  // set onlyFront mode
+  if (args.map(e=>e.toLowerCase()).indexOf("onlyfront") !== -1 ) {
+    onlyFront = true;
+    console.log(`>> onlyFront mode <<\n`);
   }
   // set headless mode
   if (args.indexOf("headless") !== -1 ) {
@@ -67,7 +97,14 @@ const params = {
 }
 // console.log(params);
 
-//
+function stopCrawl() {
+  state.active = false;
+}
+function crawl(id = 0) {
+  //
+  if(id){
+    startAt = id
+  }
 // get token 
 getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
 .then((token)=>{
@@ -107,8 +144,63 @@ getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
 // async loop: hit all pages
 .then((jsons)=>{
   const {jsonKeys, jsonObj} = jsons;  
+  state.active = true
   forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
-    console.log('>> end <<');
+    console.log('>> end <<', state.id);
     // process.exit(1);
   })
+})
+}
+
+
+
+app.use(express.static('public'));
+app.get("/start", function (req, res) {
+  if(state.active){
+    return;
+  }
+  state.active=true
+
+  if(!onlyFront){
+    crawl();
+  }
+
+  res.send({state:state.active, last:state.info});
+});
+app.get("/start/:id", function (req, res) {
+  if(state.active){
+    return;
+  }
+  state.active=true
+
+  if(!onlyFront){
+    crawl(+req.params.id);
+  }
+  
+  res.send({state:state.active, last:state.info, startAt:+req.params.id});
+})
+app.get("/stop", function (req, res) {
+  stopCrawl()
+  res.send({state:state.active, last:state.info});
+});
+app.get("/last", function (req, res) {
+  res.send({state:state.active, last:state.info});
+});
+app.get("*", function (req, res) {
+  res.redirect("/");
+});
+
+
+app.listen(port, () => {
+  console.log(`server mr grabber listening at http://localhost:${port}`);
+});
+
+
+
+wss.on("connection", socket => {
+
+  socket.send(JSON.stringify({
+    id: state.id,
+    version: '0.0.1',
+  }))
 })

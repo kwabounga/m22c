@@ -60,7 +60,7 @@ const getAllCatsUrls = async function(url, token, scopeId){
       body: JSON.stringify({}),
       redirect: 'follow'
     }).then((response) => {        
-        response.json().then((t) => {
+        response.text().then((t) => {
           
           if(t.message){
             console.log('message', t)
