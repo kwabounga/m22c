@@ -15,7 +15,8 @@ const port = process.env.PORT || 1223;
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
-
+let cors = require("cors");
+app.use(cors())
 
 // web socket
 const WebSocket = require('ws');
