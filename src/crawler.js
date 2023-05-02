@@ -35,8 +35,12 @@ async function forLoopUrls(jsonKeys,jsonObj , startAt = 0) {
     promises.push(page.waitForNavigation());
     state.id = index;
     state.info = {index, id:jsonObj[urlKey], url: urlKey};
+    if(jsonKeys[index-1]){
+      state.crawled.push({index:index-1, id:jsonObj[jsonKeys[index-1]], url: jsonKeys[index-1]})
+    }
     await page.goto(urlKey);
     await Promise.all(promises);
+
   }
   console.log("...end");
 

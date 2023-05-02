@@ -2,6 +2,7 @@
 require("dotenv").config();
 const path = require("path");
 const { getEnvValues } = require("./src/tools");
+const { URL_MOCK } = require("./src/mock");
 const { getToken, getAllCatsUrls } = require("./src/magento");
 const { forLoopUrls, launchPuppeteer } = require("./src/crawler");
 const { rejects } = require("assert");
@@ -36,6 +37,7 @@ const wss = new WebSocket.Server({
 let headless = false;
 let startAt = null;
 let onlyFront = false;
+let mocked = false;
 
 
 // get args if any
@@ -58,6 +60,11 @@ if (args.length) {
   if (args.map(e=>e.toLowerCase()).indexOf("onlyfront") !== -1 ) {
     onlyFront = true;
     console.log(`>> onlyFront mode <<\n`);
+  }
+  // set mocked mode
+  if (args.map(e=>e.toLowerCase()).indexOf("mocked") !== -1 ) {
+    mocked = true;
+    console.log(`>> mocked mode <<\n`);
   }
   // set headless mode
   if (args.indexOf("headless") !== -1 ) {
@@ -103,10 +110,26 @@ function stopCrawl() {
 }
 function crawl(id = 0) {
   //
-  if(id){
-    startAt = id
-  }
-// get token 
+  startAt = id
+  
+  if(mocked){
+    launchPuppeteer(headless).then(() => {
+      const jsonKeys = Object.keys(URL_MOCK)
+          const jsonObj = URL_MOCK;
+      if(id==0){
+        
+          state.reset()
+          state.init(jsonKeys)
+      }
+      state.active = true;
+      forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
+        console.log('>> end <<', state.id);
+        // process.exit(1);
+      })
+    });
+    
+  }else {
+    // get token 
 getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
 .then((token)=>{
   console.log(`token: [${token}]`)
@@ -144,13 +167,18 @@ getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
 })
 // async loop: hit all pages
 .then((jsons)=>{
-  const {jsonKeys, jsonObj} = jsons;  
-  state.active = true
+  
+  const {jsonKeys, jsonObj} = jsons;
+  state.reset()
+  state.init(jsonKeys)
+  state.active = true;
   forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
     console.log('>> end <<', state.id);
     // process.exit(1);
   })
 })
+  }
+
 }
 
 
@@ -160,32 +188,32 @@ app.get("/start", function (req, res) {
   if(state.active){
     return;
   }
-  state.active=true
+  state.active=true;
 
   if(!onlyFront){
     crawl();
   }
 
-  res.send({state:state.active, last:state.info});
+  res.send(state.state);
 });
 app.get("/start/:id", function (req, res) {
   if(state.active){
     return;
   }
-  state.active=true
+  state.active=true;
 
   if(!onlyFront){
     crawl(+req.params.id);
   }
   
-  res.send({state:state.active, last:state.info, startAt:+req.params.id});
+  res.send({...state.state, startAt:+req.params.id});
 })
 app.get("/stop", function (req, res) {
   stopCrawl()
-  res.send({state:state.active, last:state.info});
+  res.send(state.state);
 });
 app.get("/last", function (req, res) {
-  res.send({state:state.active, last:state.info});
+  res.send(state.state);
 });
 app.get("*", function (req, res) {
   res.redirect("/");
