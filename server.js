@@ -5,6 +5,7 @@ const { getEnvValues } = require("./src/tools");
 const { URL_MOCK } = require("./src/mock");
 const { getToken, getAllCatsUrls } = require("./src/magento");
 const { forLoopUrls, launchPuppeteer } = require("./src/crawler");
+const { authMiddleware } = require("./src/auth");
 const { rejects } = require("assert");
 
 const State = require("./src/state");
@@ -93,8 +94,9 @@ let allRequieredValues = [
   'ADMIN_PASSWORD',
   'ADMIN_BASEURL',
   'ADMIN_ALL_LINKS_URL',
+  'FRONT_ADMIN_ACCESS',
 ];
-const {ADMIN_CONNEXION_URL,ADMIN_USERNAME,ADMIN_PASSWORD,ADMIN_BASEURL,ADMIN_ALL_LINKS_URL} = getEnvValues(allRequieredValues)
+const {ADMIN_CONNEXION_URL,ADMIN_USERNAME,ADMIN_PASSWORD,ADMIN_BASEURL,ADMIN_ALL_LINKS_URL,FRONT_ADMIN_ACCESS} = getEnvValues(allRequieredValues)
 // console.log(ADMIN_CONNEXION_URL,ADMIN_USERNAME,ADMIN_PASSWORD,ADMIN_BASEURL,ADMIN_ALL_LINKS_URL)
 
 
@@ -184,7 +186,7 @@ getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
 
 
 app.use(express.static('public'));
-app.get("/start", function (req, res) {
+app.get("/start", authMiddleware, function (req, res) {
   if(state.active){
     return;
   }
@@ -196,7 +198,7 @@ app.get("/start", function (req, res) {
 
   res.send(state.state);
 });
-app.get("/start/:id", function (req, res) {
+app.get("/start/:id", authMiddleware, function (req, res) {
   if(state.active){
     return;
   }
@@ -208,11 +210,11 @@ app.get("/start/:id", function (req, res) {
   
   res.send({...state.state, startAt:+req.params.id});
 })
-app.get("/stop", function (req, res) {
+app.get("/stop", authMiddleware,function (req, res) {
   stopCrawl()
   res.send(state.state);
 });
-app.get("/last", function (req, res) {
+app.get("/last", authMiddleware ,function (req, res) {
   res.send(state.state);
 });
 app.get("*", function (req, res) {
@@ -227,9 +229,13 @@ app.listen(port, () => {
 
 
 wss.on("connection", socket => {
-
   socket.send(JSON.stringify({
     id: state.id,
     version: '0.0.1',
   }))
 })
+
+
+
+
+ 
