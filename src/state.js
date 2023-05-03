@@ -4,9 +4,11 @@ class AppState {
     this._basicAuth = false;
     this._active = false;
     this.currentUrlID = 0;
-    this.currentUrlInfo = {index:-1, id:-1, url: 'http://localhost:1223'};
+    this.currentLength = 0;
+    this.currentUrlInfo = {index:-1, id:-1, url: 'http://localhost:1223', status:0};
     this._crawled = [];
     this._all = [];
+    this._startTime = 0;
   }
   /**
    * get all urls to be crawled
@@ -21,7 +23,12 @@ class AppState {
   get crawled() {
     return this._crawled;
   }
-
+  /**
+   * set all crawled urls
+   */
+  set crawled(crawled) {
+    this._crawled = crawled;
+  }
   /**
    * get the current id crawled
    */
@@ -34,6 +41,20 @@ class AppState {
   set id(id) {
     this.currentUrlID = id;
   }
+
+  /**
+   * get the current urls set length
+   */
+  get length() {
+    return this.currentLength;
+  }
+  /**
+   * set the current urls set length
+   */
+  set length(length) {
+    this.currentLength = length;
+  }
+
 
   /**
    * get the current url object
@@ -56,7 +77,7 @@ class AppState {
   /**
    * set the status
    */
-  set active(val) {    
+  set active(val) {
     this._active = val;
     console.log('ACTIVE:', val);
   }
@@ -78,15 +99,17 @@ class AppState {
    * get the global state object
    */
   get state() {
-    return {basicAuth:this.basicAuth,state:this.active, last:this.info, crawled:this.crawled, all:this.all};
+    return {basicAuth:this.basicAuth,state:this.active, length:this.currentLength, last:this.info, crawled:this.crawled, all:this.all};
   }
 
   reset(){
     this._active = false;
     this.currentUrlID = 0;
-    this.currentUrlInfo = {index:-1, id:-1, url: 'http://localhost:1223'};
+    this.currentLength = 0;
+    this.currentUrlInfo = {index:-1, id:-1, url: 'http://localhost:1223', status:0};
     this._crawled = [];
     this._all = [];
+    this._startTime = 0;
   }
   
   init(urls){

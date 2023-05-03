@@ -5,3 +5,4 @@ package-lock.json
 /.env copy
 .env_preprod
 /public
+log/*.log

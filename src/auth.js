@@ -10,7 +10,7 @@ authMiddleware = (req, res, next) => {
     const goodToken = Buffer.from(process.env['FRONT_ADMIN_ACCESS']).toString('base64').trim();
     // console.log(`[${token}] / [${goodToken}] : [${token == goodToken}]`);
   if(token == goodToken){
-    console.log('-- auth ok --');
+    // console.log('-- auth ok --');
     state.basicAuth = req.headers.authorization;
     next();
   } else {
@@ -19,7 +19,7 @@ authMiddleware = (req, res, next) => {
   } catch (error) {
     state.state = false;
     return res.status(401).json({
-      error,
+      error:error.message,
       message: 'Auth failure',
     })
   }

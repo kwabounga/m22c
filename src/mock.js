@@ -1,3 +1,4 @@
+/* 
 const URL_MOCK = {
   'https://jeujouet-nd16900-1648.fast-mage.com/nos-univers-de-jouets':150,
   'https://jeujouet-nd16900-1648.fast-mage.com/naissance':150,
@@ -1327,5 +1328,35 @@ const URL_MOCK = {
   'https://jeujouet-nd16900-1648.fast-mage.com/oiseau-bateau-sacs-a-dos-astro':150,
   'https://jeujouet-nd16900-1648.fast-mage.com/les-deglingos-melimelos-biche':150,
   
+}
+*/
+const URL_MOCK = {
+  'http://jeujouet.local.docker.moulinroty.fr/carte-cadeau':150,
+  'http://jeujouet.local.docker.moulinroty.fr/marques':150,
+  'http://jeujouet.local.docker.moulinroty.fr/haba':150,
+  'http://jeujouet.local.docker.moulinroty.fr/les-deglingos':150,
+  'http://jeujouet.local.docker.moulinroty.fr/lilliputiens':150,
+  'http://jeujouet.local.docker.moulinroty.fr/oiseau-bateau':150,
+  'http://jeujouet.local.docker.moulinroty.fr/petit-jour-paris':150,
+  'http://jeujouet.local.docker.moulinroty.fr/trousselier-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/jouet-enfant':150,
+  'http://jeujouet.local.docker.moulinroty.fr/jouet-tirer-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/jeu-de-construction':150,
+  'http://jeujouet.local.docker.moulinroty.fr/instrument-musique-enfant':150,
+  'http://jeujouet.local.docker.moulinroty.fr/voiture-en-bois':150,
+  'http://jeujouet.local.docker.moulinroty.fr/petit-jour-paris-licence-pierre-lapin-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-appliques-murales':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-cales-bebe-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-chapeaux':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-lampes-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-horloges':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-mobiles-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-boites-a-musique':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-abats-jours-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-etageres-murales':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-tableaux-musicaux-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/ventes-privees-les-sacs-de-sport-et-autres':150,
+  'http://jeujouet.local.docker.moulinroty.fr/sticker-personnalise-bebe-url-de-merde':150,
+  'http://jeujouet.local.docker.moulinroty.fr/coffre-jouets-personnalise':150,
 }
 exports.URL_MOCK = URL_MOCK

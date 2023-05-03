@@ -8,11 +8,13 @@ const getToken = async function(url, params){
     'Accept-Encoding':'gzip, deflate, br',
     'Connection':'keep-alive'
   }
+
   if(process.env['PREPROD_BASIC_AUTH']){
     let basicAuth = Buffer.from(process.env['PREPROD_BASIC_AUTH']).toString('base64')
-      console.log('PREPROD_BASIC_AUTH', basicAuth)
+    console.log('PREPROD_BASIC_AUTH', basicAuth)
     headersObj['Authorization'] = `Basic ${basicAuth}`
   }
+
   return new Promise((resolve,reject)=>{
     fetch(url, {
       method: 'POST',
@@ -22,7 +24,7 @@ const getToken = async function(url, params){
     }).then((response) => {        
         response.text().then((t) => {
 
-          resolve(t.replace(/\"/gm,''))
+          resolve(t.replace(/\"/gm,''));
         });
     }).catch((e)=>{
         reject(e);
@@ -40,8 +42,8 @@ const getAllCatsUrls = async function(url, token, scopeId){
     let auth = `Bearer ${token}`;
     
     if(process.env['PREPROD_BASIC_AUTH']){
-      let basicAuth = Buffer.from(process.env['PREPROD_BASIC_AUTH']).toString('base64')
-      console.log('PREPROD_BASIC_AUTH', basicAuth)
+      let basicAuth = Buffer.from(process.env['PREPROD_BASIC_AUTH']).toString('base64');
+      console.log('PREPROD_BASIC_AUTH', basicAuth);
       auth = `Basic ${basicAuth};` + auth;
     }
     headersObj = {
@@ -52,8 +54,10 @@ const getAllCatsUrls = async function(url, token, scopeId){
       'Connection':'keep-alive',
       'user-agent':'moulinroty hitter agent',
     }
-    console.log(route);
-    console.log(auth);
+
+    // console.log(route);
+    // console.log(auth);
+
     fetch(route, {
       method: 'POST',
       headers: headersObj,
@@ -63,7 +67,7 @@ const getAllCatsUrls = async function(url, token, scopeId){
         response.text().then((t) => {
           
           if(t.message){
-            console.log('message', t)
+            // console.log('message', t);
             reject(t.message);
             return;
           }

@@ -21,11 +21,13 @@ let cors = require("cors");
 app.use(cors())
 
 // web socket
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({
-  server: server,
-  path: ("/state")
-})
+// const WebSocket = require('ws');
+// const wss = new WebSocket.Server({
+//   server: server,
+//   path: ("/state")
+// })
+
+
 // console.log('state',state)
 // state.stop = true
 // console.log('state',state)
@@ -132,60 +134,58 @@ function crawl(id = 0) {
     
   }else {
     // get token 
-getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
-.then((token)=>{
-  console.log(`token: [${token}]`)
-  return token;  
-})
-// get all cat urls
-.then((token)=>{
-  return  getAllCatsUrls(`${ADMIN_BASEURL}${ADMIN_ALL_LINKS_URL}`, token, 2)
-    .then( (cats) => {
-
-      cats = cats.replace(/\\/g, "");
-      cats.trim();
-      cats = cats.slice(1, -1);
-      
-      let objCats = JSON.parse(cats);
-      return objCats;    
+    getToken(`${ADMIN_BASEURL}${ADMIN_CONNEXION_URL}`, params)
+    .then((token)=>{
+      console.log(`token: [${token}]`)
+      return token;  
     })
-})
-// compute obj cats
-.then((objCats)=>{
-    // console.log('urls:', objCats);
-    keys = Object.keys(objCats);
-    vals = Object.values(objCats);
-    // console.log(keys);
-    // console.log(vals);
-    return { jsonKeys:keys, jsonObj:objCats}
-})
-// launch puppetteer
-.then((jsons) => {  
-  return new Promise((resolve, reject)=>{
-    launchPuppeteer(headless).then(() => {
-      resolve(jsons)  
-    });
-  })
-})
-// async loop: hit all pages
-.then((jsons)=>{
-  
-  const {jsonKeys, jsonObj} = jsons;
-  state.reset()
-  state.init(jsonKeys)
-  state.active = true;
-  forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
-    console.log('>> end <<', state.id);
-    // process.exit(1);
-  })
-})
-  }
+    // get all cat urls
+    .then((token)=>{
+      return  getAllCatsUrls(`${ADMIN_BASEURL}${ADMIN_ALL_LINKS_URL}`, token, 2)
+        .then( (cats) => {
 
+          cats = cats.replace(/\\/g, "");
+          cats.trim();
+          cats = cats.slice(1, -1);
+          
+          let objCats = JSON.parse(cats);
+          return objCats;    
+        })
+    })
+    // compute obj cats
+    .then((objCats)=>{
+        // console.log('urls:', objCats);
+        keys = Object.keys(objCats);
+        vals = Object.values(objCats);
+        // console.log(keys);
+        // console.log(vals);
+        return { jsonKeys:keys, jsonObj:objCats}
+    })
+    // launch puppetteer
+    .then((jsons) => {  
+      return new Promise((resolve, reject)=>{
+        launchPuppeteer(headless).then(() => {
+          resolve(jsons)  
+        });
+      })
+    })
+    // async loop: hit all pages
+    .then((jsons)=>{
+      
+      const {jsonKeys, jsonObj} = jsons;
+      state.reset()
+      state.init(jsonKeys)
+      state.active = true;
+      forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
+        console.log('>> end <<', state.id);
+        // process.exit(1);
+      })
+    })
+  }
 }
 
-
-
 app.use(express.static('public'));
+
 app.get("/start", authMiddleware, function (req, res) {
   if(state.active){
     return;
@@ -198,10 +198,12 @@ app.get("/start", authMiddleware, function (req, res) {
 
   res.send(state.state);
 });
+
 app.get("/start/:id", authMiddleware, function (req, res) {
   if(state.active){
     return;
   }
+
   state.active=true;
 
   if(!onlyFront){
@@ -210,30 +212,32 @@ app.get("/start/:id", authMiddleware, function (req, res) {
   
   res.send({...state.state, startAt:+req.params.id});
 })
+
 app.get("/stop", authMiddleware,function (req, res) {
   stopCrawl()
   res.send(state.state);
 });
+
 app.get("/last", authMiddleware ,function (req, res) {
+  // console.log('-- last --');
   res.send(state.state);
 });
+
 app.get("*", function (req, res) {
   res.redirect("/");
 });
-
 
 app.listen(port, () => {
   console.log(`server mr grabber listening at http://localhost:${port}`);
 });
 
 
-
-wss.on("connection", socket => {
-  socket.send(JSON.stringify({
-    id: state.id,
-    version: '0.0.1',
-  }))
-})
+// wss.on("connection", socket => {
+//   socket.send(JSON.stringify({
+//     id: state.id,
+//     version: '0.0.1',
+//   }))
+// })
 
 
 
