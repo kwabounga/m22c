@@ -29,18 +29,36 @@ async function forLoopUrls(jsonKeys,jsonObj , startAt = 0) {
       break;
     }
     // to take time between ajax calls
-    const urlKey = jsonKeys[index];
-    console.log("navigate to: ", urlKey, +jsonObj[urlKey], index);
+    let urlKey = jsonKeys[index];
+    console.log("navigate to: ", urlKey);
     const promises = [];
-    promises.push(page.waitForNavigation());
-    state.id = index;
-    state.info = {index, id:jsonObj[urlKey], url: urlKey};
-    if(jsonKeys[index-1]){
+    let statusCode = null;
+    const navigationPromise = page.waitForNavigation()
+    const waitForStatusPromise = page.waitForResponse(response => {
+      statusCode = response.status();
+      return response.status() === 200
+    })
+    promises.push(navigationPromise);
+    promises.push(waitForStatusPromise);
+    
+    /* if(jsonKeys[index-1]){
       state.crawled.push({index:index-1, id:jsonObj[jsonKeys[index-1]], url: jsonKeys[index-1]})
+    } */
+    let result;
+    if(process.env['PREPROD_BASIC_AUTH']){
+      result = await page.goto(urlKey.replace('https://',`https://${process.env['PREPROD_BASIC_AUTH']}@`)/* , { waitUntil: ['networkidle2'] } */);
+    } else {
+      result = await page.goto(urlKey/* , { waitUntil: ['networkidle2'] } */);
     }
-    await page.goto(urlKey);
+    statusCode = result.status()
+    if (result.status() === 404) {
+      console.error('404 status code found in result')
+    }
     await Promise.all(promises);
-
+    state.id = index;
+    state.info = {index, id:jsonObj[urlKey], url: urlKey,status:statusCode};
+    state.crawled.push(state.info)
+    console.log("cached: ", state.info.url,`[${state.info.status}]`,state.info.id,state.info.index);
   }
   console.log("...end");
 
