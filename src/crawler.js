@@ -1,7 +1,7 @@
 const State = require("./state");
 const state = new State().getInstance();
 
-const { arrayLog } = require('./logger');
+const { log, arrayLog } = require('./logger');
 
 // browser manipulation
 const puppeteer = require("puppeteer");

@@ -4,6 +4,8 @@
   "description": "hit web site urls for auto caching",
   "main": "server.js",
   "scripts": {
+    "dev": "node app.js",
+    "start": "node daemon.js start",
     "test": "echo 'no test yet :)' && echo 0"
   },
   "keywords": [
@@ -15,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "daemonize2": "^0.4.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "node-fetch": "^3.3.1",
