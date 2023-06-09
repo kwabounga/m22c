@@ -7,3 +7,6 @@ package-lock.json
 /public
 log/*.log
 m22c.pid
+err.log
+.gitignore
+out.log

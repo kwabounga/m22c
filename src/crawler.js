@@ -1,4 +1,5 @@
 const State = require("./state");
+const tools = require("./tools");
 const state = new State().getInstance();
 
 const { log, arrayLog } = require('./logger');
@@ -12,7 +13,7 @@ let page;
 async function launchPuppeteer(headless = false) {
   browser = await puppeteer.launch({ headless: headless });
   page = (await browser.pages()).at(0);
-  //console.log(page)
+  //tools.log(page)
   return { browser, page };
 }
 
@@ -22,17 +23,18 @@ exports.launchPuppeteer = launchPuppeteer;
 
 // async loop for fetching all pages
 async function forLoopUrls(jsonKeys,jsonObj , startAt = 0) {
-  
-  console.log("get all urls...");
+  let forceStop = false;
+  tools.log("get all urls...");
   state.length = jsonKeys.length;
 
   for (let index = +startAt; index < jsonKeys.length; index++) {
     if(!state.active){
+      forceStop = true
       break;
     }
     // to take time between ajax calls
     let urlKey = jsonKeys[index];
-    console.log("navigate to: ", urlKey);
+    tools.log("navigate to: ", urlKey);
     const promises = [];
     let statusCode = null;
     const navigationPromise = page.waitForNavigation()
@@ -55,20 +57,20 @@ async function forLoopUrls(jsonKeys,jsonObj , startAt = 0) {
     }
     statusCode = result.status()
     if (result.status() === 404) {
-      console.error('404 status code found in result')
+      console.error('404 status code found in result', urlKey)
     }
     await Promise.all(promises);
     state.id = index;
     state.info = {index, id:jsonObj[urlKey], url: urlKey,status:statusCode};
     state.crawled.push(state.info)
-    console.log("cached: ", state.info.url,`[${state.info.status}]`,state.info.id,state.info.index);
+    tools.log("cached: ", state.info.url,`[${state.info.status}]`,state.info.id,state.info.index);
 
     if(index === jsonKeys.length-1){
-      console.log("...reloaaaaad");
+      tools.log("...reloaaaaad");
       index = -1;
       jsonKeys = state.crawled.filter(u => u.status !== 404 ).map( u => u.url );
 
-      console.log(jsonKeys.length , jsonKeys);
+      tools.log(jsonKeys.length , jsonKeys);
       await arrayLog(state.crawled.filter(u => u.status === 404 ).map( u => u.url ))
       state.length = jsonKeys.length;
       state.crawled = [];
@@ -77,6 +79,8 @@ async function forLoopUrls(jsonKeys,jsonObj , startAt = 0) {
   
 
   await browser.close();
+  return  forceStop;
 }
 
 exports.forLoopUrls = forLoopUrls;
+exports.browser = browser;

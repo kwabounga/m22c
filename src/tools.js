@@ -79,7 +79,14 @@ function date() {
   let d = new Date();
   return `${d.getDate().toString().padStart(2,'0')}-${(d.getMonth() + 1 ).toString().padStart(2,'0')}-${d.getFullYear()}`;
 }
-
+/**
+ * generate date
+ * @returns {string}
+ */
+function currentTime() {
+  let d = new Date();
+  return `${d.getHours().toString().padStart(2,'0')}:${(d.getMinutes() + 1 ).toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+}
 /**
  * generate timestamp
  * @returns {string}
@@ -89,6 +96,12 @@ function timestamp() {
   return `${d.getTime()}`;
 }
 
+/**
+ * special log
+ */
+function log() {
+  console.log(`[${process.pid}]`,`[${date()} | ${currentTime()}]`,...arguments)
+}
 
 
 
@@ -97,3 +110,4 @@ exports.wait = wait;
 exports.guid = guid;
 exports.date = date;
 exports.timestamp = timestamp;
+exports.log = log;

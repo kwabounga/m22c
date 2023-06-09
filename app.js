@@ -1,19 +1,21 @@
 // get & merge config in .env with process.env
 require("dotenv").config();
+const fs = require("fs");
 const path = require("path");
 const { getEnvValues } = require("./src/tools");
 const { URL_MOCK } = require("./src/mock");
 const { getToken, getAllCatsUrls } = require("./src/magento");
-const { forLoopUrls, launchPuppeteer } = require("./src/crawler");
+const { forLoopUrls, launchPuppeteer, browser } = require("./src/crawler");
 const { authMiddleware } = require("./src/auth");
 const { rejects } = require("assert");
 
 const State = require("./src/state");
 const state = new State().getInstance();
+const tools = require("./src/tools");
 
 // micro server
 const express = require("express");
-const port = process.env.PORT || 1223;
+let port = process.env.PORT || 1223;
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
@@ -37,10 +39,11 @@ app.use(cors())
 
 
 // global vars form browser manipulation 
-let headless = false;
+let headless = true; // set to true before deploy
 let startAt = null;
 let onlyFront = false;
 let mocked = false;
+let configFile = 'config.json';
 
 
 // get args if any
@@ -56,8 +59,13 @@ if (args.length) {
     help : show help
     headless : activate headless
     start=[id] : start At [id]
+    port=[port] : use port [port]
     `);
     process.exit(1);
+  }
+  // set dev mode
+  if (args.map(e=>e.toLowerCase()).indexOf("dev") !== -1 ) {
+    console.log(`>> dev mode <<\n`);
   }
   // set onlyFront mode
   if (args.map(e=>e.toLowerCase()).indexOf("onlyfront") !== -1 ) {
@@ -70,10 +78,11 @@ if (args.length) {
     console.log(`>> mocked mode <<\n`);
   }
   // set headless mode
-  if (args.indexOf("headless") !== -1 ) {
-    headless = true;
-    console.log(`>> headless mode <<\n`);
+  if (args.indexOf("noheadless") !== -1 ) {
+    headless = false;
+    console.log(`>> no headless mode <<\n`);
   }
+  // START AT
   let regex = /start\=(\d*)/;
   // let startAt;
   if(args.some(e => {
@@ -84,6 +93,30 @@ if (args.length) {
     return t;
   })){
     console.log('start:', startAt);
+  }
+  // PORT
+  regex = /port\=(\d*)/;
+  // let startAt;
+  if(args.some(e => {
+    let t = regex.test(e);
+    if(t){
+      port = e.split('=')[1];
+    }
+    return t;
+  })){
+    console.log('PORT:', port);
+  }
+  // CONFIG
+  regex = /config\=(\d*)/;
+  // let startAt;
+  if(args.some(e => {
+    let t = regex.test(e);
+    if(t){
+      configFile = e.split('=')[1];
+    }
+    return t;
+  })){
+    console.log('config:', configFile);
   }
 }
 // process.exit(1)
@@ -99,6 +132,23 @@ let allRequieredValues = [
   'FRONT_ADMIN_ACCESS',
 ];
 const {ADMIN_CONNEXION_URL,ADMIN_USERNAME,ADMIN_PASSWORD,ADMIN_BASEURL,ADMIN_ALL_LINKS_URL,FRONT_ADMIN_ACCESS} = getEnvValues(allRequieredValues)
+
+// ICI recupération des infos en plus 
+
+const config = loadConfig();
+
+function loadConfig() {
+  let r = {
+    "scope_id": 2
+  }
+  try {
+    r = JSON.parse(fs.readFileSync(`${__dirname}/${configFile}`));
+  } catch (error) {
+    tools.log(error)
+  }
+    return r
+}
+tools.log('SCOPE!!', config.scope_id)
 // console.log(ADMIN_CONNEXION_URL,ADMIN_USERNAME,ADMIN_PASSWORD,ADMIN_BASEURL,ADMIN_ALL_LINKS_URL)
 
 
@@ -141,7 +191,7 @@ function crawl(id = 0) {
     })
     // get all cat urls
     .then((token)=>{
-      return  getAllCatsUrls(`${ADMIN_BASEURL}${ADMIN_ALL_LINKS_URL}`, token, 2)
+      return  getAllCatsUrls(`${ADMIN_BASEURL}${ADMIN_ALL_LINKS_URL}`, token, config.scope_id)
         .then( (cats) => {
 
           cats = cats.replace(/\\/g, "");
@@ -176,9 +226,12 @@ function crawl(id = 0) {
       state.reset()
       state.init(jsonKeys)
       state.active = true;
-      forLoopUrls(jsonKeys, jsonObj, startAt).then((response)=>{
+      forLoopUrls(jsonKeys, jsonObj, startAt).then((forceStop)=>{
         console.log('>> end <<', state.id);
-        // process.exit(1);
+        console.log('>> reload !', forceStop);
+        if(!forceStop){
+          crawl();
+        }
       })
     })
   }
@@ -229,9 +282,13 @@ app.get("*", function (req, res) {
 
 app.listen(port, () => {
   console.log(`server mr grabber listening at http://localhost:${port}`);
+  crawl();
 });
 
-
+process.on('beforeExit', (code) => {
+  browser.close()
+  console.log('Process beforeExit event with code: ', code);
+});
 // wss.on("connection", socket => {
 //   socket.send(JSON.stringify({
 //     id: state.id,

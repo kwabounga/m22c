@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "dev": "node app.js",
-    "start": "node daemon.js start",
+    "daemon:start:dev": "forever start -ta -l log.log -o out.log -e err.log app.js noheadless",
+    "daemon:start": "forever start -ta -l log.log -o out.log -e err.log app.js",
+    "daemon:stop": "forever stop app.js --killSignal=SIGTERM",
+    "daemon:logs": "forever logs",
+    "daemon:list": "forever list",
     "test": "echo 'no test yet :)' && echo 0"
   },
   "keywords": [
@@ -17,11 +21,12 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "daemonize2": "^0.4.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "node-fetch": "^3.3.1",
     "puppeteer": "^19.9.0",
     "ws": "^8.13.0"
+  },
+  "devDependencies": {
   }
 }

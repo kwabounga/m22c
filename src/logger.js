@@ -5,7 +5,7 @@ const tools = require("./tools");
 const { error } = require('console');
 
 const log = (output, ...args) => {
-    let o = `[${tools.date()}|${tools.timestamp()}] ${output} ${args.join(' ')}\n`;
+    let o = `[${process.pid}][${tools.date()}|${tools.timestamp()}] ${output} ${args.join(' ')}\n`;
     return new Promise((resolve,reject)=>{
         fs.appendFile(theLogPath, o, 'utf8', (err) => {
             if(err) reject(error);
