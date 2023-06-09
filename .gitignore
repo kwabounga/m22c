@@ -8,5 +8,4 @@ package-lock.json
 log/*.log
 m22c.pid
 err.log
-.gitignore
 out.log
